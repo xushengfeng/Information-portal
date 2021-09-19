@@ -1,9 +1,18 @@
 import os
 import sys
 import multiprocessing
-from PyQt5.QtCore import QBuffer, QRect, Qt, qAbs
+import csv
+from PyQt5.QtCore import QBuffer, QRect, Qt, qAbs,QUrl,QSize
 from PyQt5.QtGui import QColor, QGuiApplication, QPainter, QPen
 from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QTextBrowser, QVBoxLayout
+from PyQt5.QtWebEngineWidgets import QWebEngineView
+import webbrowser
+
+data=list(csv.reader(open('data.csv')))
+ocr_src=data[1][0]
+translate_src=data[1][1]
+search_src=data[1][2]
+
 class windows():
     # 截屏
     def clip():
@@ -108,26 +117,44 @@ class windows():
             sys.exit(app.exec_())
     
     def show_text(x):
-        class text(QWidget):
+        from fk import Ui_MainWindow
+        from PyQt5.QtWidgets import QApplication, QMainWindow
+        class MyMainForm(QMainWindow, Ui_MainWindow):
+            def __init__(self, parent=None):
+                super(MyMainForm, self).__init__(parent)
+                self.setupUi(self)
 
-            def __init__(self):
-                super().__init__()
-                self.initUI()
-
-            def initUI(self):
-                self.tb = QTextBrowser()
-                self.tb.setText(x)
-                vbox = QVBoxLayout()
-                vbox.addWidget(self.tb, 0)
-
-                self.setLayout(vbox)
-                self.setWindowTitle('QTextBrowser')
-                self.show()
+                self.textEdit.setText(x)
+                self.pushButton_1.clicked.connect(lambda:self.display_interface('search'))
+                self.pushButton_2.clicked.connect(lambda:self.display_interface('translate'))
+                self.pushButton_3.clicked.connect(lambda:self.display_interface('open'))
+            def display_interface(self,m):
+                x=self.textEdit.toPlainText()
+                url=''
+                if m=='search':
+                    url=search_src.replace('%s', x)
+                if m=='translate':
+                    url=translate_src.replace('%s', x)
+                self.webEngineView.setUrl(QUrl(url))
+                self.webEngineView.setMinimumSize(QSize(0, 500))
+                def createWindow(self, QWebEnginePage_WebWindowType):
+                    if QWebEnginePage_WebWindowType == QWebEnginePage.WebBrowserTab:
+                        self.newWeb = MyWebView(self)
+                        # self.newWeb = MyWebView()  # 不认self为父，就会在新窗口显示，认self作父就能在当前窗口显示
+                        self.newWeb.setAttribute(Qt.WA_DeleteOnClose, True)  # 加上这个属性能防止Qt Qtwebengineprocess进程关不掉导致崩溃
+                        self.newWeb.setGeometry(QtCore.QRect(0, 0, 300, 150))
+                        self.newWeb.show()
+                    return self.newWeb
+                    return super(MyWebView, self).createWindow(QWebEnginePage_WebWindowType)
+                if m=='open':
+                    webbrowser.open_new(srt(url))
+                # else:
+                    # QMessageBox.warning(self,"标题","",QMessageBox.Yes|QMessageBox.No,QMessageBox.Yes)
 
         if __name__ == "__main__":
             app = QApplication(sys.argv)
-            window = text()
-            window.show()
+            myWin = MyMainForm()
+            myWin.show()
             sys.exit(app.exec_())
 
 def ocr(x):
@@ -138,7 +165,6 @@ def ocr(x):
     boxes = [line[0] for line in result]
     txts = [line[1][0] for line in result]
     scores = [line[1][1] for line in result]
-    # print(txts)
     x.put(txts)
 
 if __name__ == "__main__":
@@ -149,9 +175,8 @@ if __name__ == "__main__":
     q = multiprocessing.Queue()
     o = multiprocessing.Process(target=ocr,args=(q,))
     o.start()
-    # print(q.get())
     o.join()
-    show_ocr_text=None
+    show_text=''
     for i in q.get():
-        show_ocr_text=i+'\n'
-    windows.show_text(show_ocr_text)
+        show_text=show_text+i+'\n'
+    windows.show_text(show_text)

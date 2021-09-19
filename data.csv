@@ -1,2 +1,2 @@
 ocr,tanslate,search
-access_token,,
+,https://translate.google.cn/?op=translate&text=%s,https://www.baidu.com/s?wd=%s
