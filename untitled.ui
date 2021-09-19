@@ -14,13 +14,13 @@
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QHBoxLayout" name="horizontalLayout_7">
-    <item>
-     <layout class="QVBoxLayout" name="layout">
+   <layout class="QGridLayout" name="gridLayout">
+    <item row="0" column="0">
+     <layout class="QVBoxLayout" name="verticalLayout_2">
       <item>
        <layout class="QHBoxLayout" name="horizontalLayou">
         <item>
-         <widget class="QComboBox" name="comboBox">
+         <widget class="QComboBox" name="comboBox_1">
           <property name="layoutDirection">
            <enum>Qt::LeftToRight</enum>
           </property>
@@ -46,15 +46,28 @@
        </layout>
       </item>
       <item>
-       <widget class="QTextEdit" name="textEdit"/>
-      </item>
-      <item>
-       <widget class="QWebEngineView" name="webEngineView">
-        <property name="url">
-         <url>
-          <string>about:blank</string>
-         </url>
+       <widget class="QSplitter" name="splitter">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
         </property>
+        <widget class="QTextEdit" name="textEdit">
+         <property name="cursor" stdset="0">
+          <cursorShape>IBeamCursor</cursorShape>
+         </property>
+        </widget>
+        <widget class="QWebEngineView" name="webEngineView">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="url">
+          <url>
+           <string>about:blank</string>
+          </url>
+         </property>
+        </widget>
        </widget>
       </item>
      </layout>

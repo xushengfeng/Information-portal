@@ -9,9 +9,12 @@ from PyQt5.QtWebEngineWidgets import QWebEngineView
 import webbrowser
 
 data=list(csv.reader(open('data.csv')))
-ocr_src=data[1][0]
-translate_src=data[1][1]
-search_src=data[1][2]
+search_dic={}
+for n ,i in enumerate(data[0]):
+    search_dic[i]=data[1][n]
+translate_dic={}
+for n ,i in enumerate(data[2]):
+    translate_dic[i]=data[3][n]
 
 class windows():
     # 截屏
@@ -124,28 +127,22 @@ class windows():
                 super(MyMainForm, self).__init__(parent)
                 self.setupUi(self)
 
+                self.comboBox_1.addItems(data[0])
+                self.comboBox_2.addItems(data[2])
                 self.textEdit.setText(x)
                 self.pushButton_1.clicked.connect(lambda:self.display_interface('search'))
                 self.pushButton_2.clicked.connect(lambda:self.display_interface('translate'))
-                self.pushButton_3.clicked.connect(lambda:self.display_interface('open'))
             def display_interface(self,m):
                 x=self.textEdit.toPlainText()
                 url=''
                 if m=='search':
-                    url=search_src.replace('%s', x)
+                    o_url=search_dic[self.comboBox_1.currentText()]
+                    url=o_url.replace('%s', x)
                 if m=='translate':
-                    url=translate_src.replace('%s', x)
+                    o_url=translate_dic[self.comboBox_2.currentText()]
+                    url=o_url.replace('%s', x)
                 self.webEngineView.setUrl(QUrl(url))
                 self.webEngineView.setMinimumSize(QSize(0, 500))
-                def createWindow(self, QWebEnginePage_WebWindowType):
-                    if QWebEnginePage_WebWindowType == QWebEnginePage.WebBrowserTab:
-                        self.newWeb = MyWebView(self)
-                        # self.newWeb = MyWebView()  # 不认self为父，就会在新窗口显示，认self作父就能在当前窗口显示
-                        self.newWeb.setAttribute(Qt.WA_DeleteOnClose, True)  # 加上这个属性能防止Qt Qtwebengineprocess进程关不掉导致崩溃
-                        self.newWeb.setGeometry(QtCore.QRect(0, 0, 300, 150))
-                        self.newWeb.show()
-                    return self.newWeb
-                    return super(MyWebView, self).createWindow(QWebEnginePage_WebWindowType)
                 if m=='open':
                     webbrowser.open_new(srt(url))
                 # else:

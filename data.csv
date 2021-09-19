@@ -1,2 +1,4 @@
-ocr,tanslate,search
-,https://translate.google.cn/?op=translate&text=%s,https://www.baidu.com/s?wd=%s
+百度,google,Bing,搜狗
+https://www.baidu.com/s?wd=%s,https://www.google.com/search?q=%s,https://cn.bing.com/search?q=%s,https://www.sogou.com/web?query=%s
+google,deepl
+https://translate.google.cn/?op=translate&text=%s,https://www.deepl.com/translator#en/zh/%s
