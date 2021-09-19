@@ -6,7 +6,7 @@ from PyQt5.QtCore import QBuffer, QRect, Qt, qAbs,QUrl,QSize
 from PyQt5.QtGui import QColor, QGuiApplication, QPainter, QPen,QDesktopServices
 from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QTextBrowser, QVBoxLayout
 from PyQt5.QtWebEngineWidgets import QWebEngineView
-import webbrowser
+import time
 
 data=list(csv.reader(open('data.csv')))
 search_dic={}
@@ -119,7 +119,7 @@ class windows():
             sys.exit(app.exec_())
     
     def show_text(x):
-        from fk import Ui_MainWindow
+        from ui import Ui_MainWindow
         from PyQt5.QtWidgets import QApplication, QMainWindow
         class MyMainForm(QMainWindow, Ui_MainWindow):
             def __init__(self, parent=None):
@@ -162,25 +162,34 @@ class windows():
             sys.exit(app.exec_())
 
 def ocr(x):
+    t1=time.time()
     from paddleocr import PaddleOCR
+    t2=time.time()
     ocr = PaddleOCR(use_gpu=False,lang="ch") # 首次执行会自动下载模型文件
     img_path = "picture.png"
     result = ocr.ocr(img_path)
+    t3=time.time()
+    print(t2-t1,t3-t2)
     boxes = [line[0] for line in result]
     txts = [line[1][0] for line in result]
     scores = [line[1][1] for line in result]
     x.put(txts)
-
-if __name__ == "__main__":
-    c = multiprocessing.Process(target=windows.clip)
-    c.start()
-    c.join()
-
+def ocr2():
     q = multiprocessing.Queue()
     o = multiprocessing.Process(target=ocr,args=(q,))
     o.start()
     o.join()
+    return q.get()
+if __name__ == "__main__":
+    c = multiprocessing.Process(target=windows.clip)
+    c.start()
+    c.join()
+    # q = multiprocessing.Queue()
+    # o = multiprocessing.Process(target=ocr,args=(q,))
+    # o.start()
+    # o.join()
     show_text=''
-    for i in q.get():
+    for i in ocr2():
         show_text=show_text+i+'\n'
     windows.show_text(show_text)
+    ocr()
