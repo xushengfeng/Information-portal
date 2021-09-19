@@ -3,7 +3,7 @@ import sys
 import multiprocessing
 import csv
 from PyQt5.QtCore import QBuffer, QRect, Qt, qAbs,QUrl,QSize
-from PyQt5.QtGui import QColor, QGuiApplication, QPainter, QPen
+from PyQt5.QtGui import QColor, QGuiApplication, QPainter, QPen,QDesktopServices
 from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QTextBrowser, QVBoxLayout
 from PyQt5.QtWebEngineWidgets import QWebEngineView
 import webbrowser
@@ -111,7 +111,6 @@ class windows():
 
             def saveImage(self):
                 self.captureImage.save('picture.png', quality=95)   # 保存图片到当前文件夹中
-                # ocr()
 
         if __name__ == "__main__":
             app = QApplication(sys.argv)
@@ -132,6 +131,9 @@ class windows():
                 self.textEdit.setText(x)
                 self.pushButton_1.clicked.connect(lambda:self.display_interface('search'))
                 self.pushButton_2.clicked.connect(lambda:self.display_interface('translate'))
+                self.pushButton_4.clicked.connect(lambda:self.display_interface('open'))
+                self.webEngineView = WebEngineView(self.splitter)
+
             def display_interface(self,m):
                 x=self.textEdit.toPlainText()
                 url=''
@@ -141,12 +143,17 @@ class windows():
                 if m=='translate':
                     o_url=translate_dic[self.comboBox_2.currentText()]
                     url=o_url.replace('%s', x)
-                self.webEngineView.setUrl(QUrl(url))
+
+                self.webEngineView.load(QUrl(url))
                 self.webEngineView.setMinimumSize(QSize(0, 500))
                 if m=='open':
-                    webbrowser.open_new(srt(url))
+                    QDesktopServices.openUrl(QUrl(self.webEngineView.url()))
                 # else:
                     # QMessageBox.warning(self,"标题","",QMessageBox.Yes|QMessageBox.No,QMessageBox.Yes)
+        class WebEngineView(QWebEngineView):
+            # 重写createwindow()
+            def createWindow(self, QWebEnginePage_WebWindowType):
+                return self
 
         if __name__ == "__main__":
             app = QApplication(sys.argv)
