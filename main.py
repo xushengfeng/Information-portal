@@ -206,7 +206,7 @@ class windows():
                         digit+=1
                     else:
                         others+=1
-                if letters/(len(x)-space-others)>0.5:
+                if letters/(len(x)-space)>0.5:
                     self.display_interface('translate')
                 else:
                     self.display_interface('search')
@@ -255,7 +255,7 @@ def xocr(data):
 if __name__ == "__main__":
     if 'c' in sys.argv:
         text = pyperclip.paste()
-        s = multiprocessing.Process(target=windows.show_text, args=(text,))
+        s = multiprocessing.Process(target=windows.show_text, args=(text,100,100))
         s.start()
         s.join()
     else:
