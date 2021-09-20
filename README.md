@@ -32,7 +32,7 @@ OCR模式:`python main.py`
 
 设置 > 快捷键 > 自定义快捷键
 
-添加命令:`cd 你下载本库的位置/Information-portal && python main.py`后面添加`c`可实现剪贴板识别
+添加命令:`python 你下载本库的位置/main.py`后面添加`c`可实现剪贴板识别
 
 ## 其他
 

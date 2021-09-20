@@ -16,7 +16,7 @@ def wording():
     if text==original_text: # 选区是否变动
         print('kobg')
 
-data = list(csv.reader(open('data.csv')))
+data = list(csv.reader(open(os.path.dirname(__file__)+'/data.csv')))
 search_dic = {}
 for n, i in enumerate(data[0]):
     search_dic[i] = data[1][n]
