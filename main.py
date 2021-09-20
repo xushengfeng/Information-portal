@@ -40,7 +40,7 @@ class windows():
             painter = QPainter()
 
             def __init__(self):
-                super(QWidget, self).__init__()
+                super(QDialog, self).__init__()
                 self.initWindow()   # 初始化窗口
                 self.captureFullScreen()    # 获取全屏
 
@@ -128,18 +128,20 @@ class windows():
                 return pickRect
 
             def saveImage(self):
-                self.captureImage.save(
-                    'picture.png', quality=95)   # 保存图片到当前文件夹中
+                # self.captureImage.save(
+                #     'picture.png', quality=95)   # 保存图片到当前文件夹中
                 byte_array = QByteArray()
                 buffer = QBuffer(byte_array)
                 buffer.open(QIODevice.WriteOnly)
-                self.captureImage.save(buffer, 'jpg', 75)
+                self.captureImage.save(buffer, 'jpg', 95)
 
                 cover_image_final = io.BytesIO(byte_array)
                 cover_image_final.seek(0)
                 byte_data = cover_image_final.getvalue()
                 base64_str = base64.b64encode(byte_data).decode('utf8')
-                q.put(base64_str)
+                ocr_r = xocr(base64_str)
+                q.put(ocr_r)
+                # print('put')
 
         if __name__ == "__main__":
             app = QApplication(sys.argv)
@@ -162,12 +164,32 @@ class windows():
                     lambda: self.display_interface('search'))
                 self.pushButton_2.clicked.connect(
                     lambda: self.display_interface('translate'))
+                # self.pushButton_3.clicked.connect(
+                    # lambda: main_process('re'))
                 self.pushButton_4.clicked.connect(
                     lambda: self.display_interface('open'))
                 self.webEngineView = WebEngineView(self.splitter)
+                if len(x)<20:
+                    self.auto_show(x)
 
-            def settext(self, x):
-                self.textEdit.setText(x)
+            def auto_show(self,x):
+                letters = 0
+                space = 0
+                digit = 0
+                others = 0
+                for c in x:
+                    if ord(c) in range(65,91) or ord(c) in range(97,123):
+                        letters+=1
+                    elif c.isspace():
+                        space+=1
+                    elif c.isdigit():
+                        digit+=1
+                    else:
+                        others+=1
+                if letters/(len(x)-space-others)>0.5:
+                    self.display_interface('translate')
+                else:
+                    self.display_interface('search')
 
             def display_interface(self, m):
                 x = self.textEdit.toPlainText()
@@ -197,7 +219,6 @@ class windows():
 
 
 def xocr(data):
-    data = data
     headers = {"Content-type": "application/json"}
     url = "http://127.0.0.1:8080"
     try:
@@ -215,7 +236,7 @@ if __name__ == "__main__":
     o = multiprocessing.Process(target=windows.clip, args=(q,))
     o.start()
     o.join()
-    text = xocr(q.get())
+    text = q.get()
     s = multiprocessing.Process(target=windows.show_text, args=(text,))
     s.start()
     s.join()
