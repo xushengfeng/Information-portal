@@ -64,6 +64,8 @@ class Ui_MainWindow(object):
         MainWindow.setStatusBar(self.statusbar)
 
         self.retranslateUi(MainWindow)
+        self.comboBox_1.currentIndexChanged['QString'].connect(self.pushButton_1.click)
+        self.comboBox_2.currentIndexChanged['QString'].connect(self.pushButton_2.click)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
