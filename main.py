@@ -1,18 +1,20 @@
-import os
-import sys
+import os, sys, csv, io, base64, requests, json
 import multiprocessing
-import csv
-import signal
 from PyQt5.QtCore import QRect, Qt, qAbs, QUrl, QSize, QIODevice, QBuffer, QByteArray, QCoreApplication
 from PyQt5.QtGui import QColor, QGuiApplication, QPainter, QPen, QDesktopServices
 from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QTextBrowser, QVBoxLayout,QDialog
 from PyQt5.QtWebEngineWidgets import QWebEngineView
 import time
-import base64
-import io
-import requests
-import json
-from PIL.ImageQt import ImageQt
+
+import pyperclip
+
+# 划词
+def wording():
+    original_text = pyperclip.paste()
+    pyautogui.hotkey('ctrl','c')
+    text = pyperclip.paste()
+    if text==original_text: # 选区是否变动
+        print('kobg')
 
 data = list(csv.reader(open('data.csv')))
 search_dic = {}
@@ -84,9 +86,10 @@ class windows():
             def keyPressEvent(self, event):
                 if event.key() == Qt.Key_Escape:
                     self.close()
+                    app.quit()
                 if event.key() == Qt.Key_Enter or event.key() == Qt.Key_Return:
                     if self.captureImage is not None:
-                        self.saveImage()
+                        self.saveImage(self.endPosition)
                         self.close()
 
             def paintBackgroundImage(self):
@@ -127,7 +130,7 @@ class windows():
 
                 return pickRect
 
-            def saveImage(self):
+            def saveImage(self,p):
                 # self.captureImage.save(
                 #     'picture.png', quality=95)   # 保存图片到当前文件夹中
                 byte_array = QByteArray()
@@ -140,8 +143,9 @@ class windows():
                 byte_data = cover_image_final.getvalue()
                 base64_str = base64.b64encode(byte_data).decode('utf8')
                 ocr_r = xocr(base64_str)
-                q.put(ocr_r)
+                q.put([ocr_r,p.x(),p.y()])
                 # print('put')
+                print(p.x(),p.y())
 
         if __name__ == "__main__":
             app = QApplication(sys.argv)
@@ -149,7 +153,8 @@ class windows():
             window.show()
             sys.exit(app.exec_())
 
-    def show_text(x):
+    def show_text(x,ox,oy):
+        print(ox)
         from ui import Ui_MainWindow
 
         class MyMainForm(QMainWindow, Ui_MainWindow):
@@ -157,6 +162,7 @@ class windows():
                 super(MyMainForm, self).__init__(parent)
                 self.setupUi(self)
 
+                self.auto_xy(ox,oy)
                 self.comboBox_1.addItems(data[0])
                 self.comboBox_2.addItems(data[2])
                 self.textEdit.setText(x)
@@ -171,6 +177,20 @@ class windows():
                 self.webEngineView = WebEngineView(self.splitter)
                 if len(x)<20:
                     self.auto_show(x)
+
+            def auto_xy(self,x,y):
+                self.desktop = QApplication.desktop()
+                screenRect = self.desktop.screenGeometry()
+                height = screenRect.height()
+                width = screenRect.width()
+                window_size=self.geometry()
+                w=window_size.width()
+                h=window_size.height()
+                if x+w>width:
+                    x=x-w
+                if y+h>height:
+                    y=y-h
+                self.move(x,y)
 
             def auto_show(self,x):
                 letters = 0
@@ -214,6 +234,7 @@ class windows():
         if __name__ == "__main__":
             app = QApplication(sys.argv)
             myWin = MyMainForm()
+            # myWin.move(ox,oy)
             myWin.show()
             sys.exit(app.exec_())
 
@@ -232,11 +253,17 @@ def xocr(data):
     return text
 
 if __name__ == "__main__":
-    q = multiprocessing.Queue()
-    o = multiprocessing.Process(target=windows.clip, args=(q,))
-    o.start()
-    o.join()
-    text = q.get()
-    s = multiprocessing.Process(target=windows.show_text, args=(text,))
-    s.start()
-    s.join()
+    if 'c' in sys.argv:
+        text = pyperclip.paste()
+        s = multiprocessing.Process(target=windows.show_text, args=(text,))
+        s.start()
+        s.join()
+    else:
+        q = multiprocessing.Queue()
+        o = multiprocessing.Process(target=windows.clip, args=(q,))
+        o.start()
+        o.join()
+        return_list = q.get()
+        s = multiprocessing.Process(target=windows.show_text, args=(return_list[0],return_list[1],return_list[2]))
+        s.start()
+        s.join()
