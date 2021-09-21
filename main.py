@@ -212,7 +212,11 @@ class windows():
                     self.display_interface('search')
 
             def display_interface(self, m):
+                cursor =self.textEdit.textCursor()
                 x = self.textEdit.toPlainText()
+                x=str(x)[int(cursor.selectionStart()):int(cursor.selectionEnd())]
+                if x == '':
+                    x = self.textEdit.toPlainText()
                 url = ''
                 if m == 'search':
                     o_url = search_dic[self.comboBox_1.currentText()]
