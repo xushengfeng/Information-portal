@@ -1,8 +1,8 @@
-import os, sys, csv, io, base64, requests, json
+import os, sys, csv, io, base64, requests, json, re
 import multiprocessing
 from PyQt5.QtCore import QRect, Qt, qAbs, QUrl, QSize, QIODevice, QBuffer, QByteArray, QCoreApplication
 from PyQt5.QtGui import QColor, QGuiApplication, QPainter, QPen, QDesktopServices
-from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QTextBrowser, QVBoxLayout,QDialog
+from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QVBoxLayout,QDialog
 from PyQt5.QtWebEngineWidgets import QWebEngineView
 import time
 
@@ -165,7 +165,7 @@ class windows():
                 self.auto_xy(ox,oy)
                 self.comboBox_1.addItems(data[0])
                 self.comboBox_2.addItems(data[2])
-                self.textEdit.setText(x)
+                self.textBrowser.setHtml(self.link(x))
                 self.pushButton_1.clicked.connect(
                     lambda: self.display_interface('search'))
                 self.pushButton_2.clicked.connect(
@@ -211,12 +211,20 @@ class windows():
                 else:
                     self.display_interface('search')
 
+            def link(self,t):
+                def double(matched):
+                    value = matched.group('value')
+                    return '<a href="'+value+'">'+value+'</a>'
+                r= r'(?P<value>(https?|ftp|file)://[-A-Za-z0-9+&@#/%?=~_|!:,.;]+[-A-Za-z0-9+&@#/%=~_|])'
+                print(re.sub(r, double, t))
+                return '<style></style>'+re.sub(r, double, t)
+
             def display_interface(self, m):
-                cursor =self.textEdit.textCursor()
-                x = self.textEdit.toPlainText()
+                cursor =self.textBrowser.textCursor()
+                x = self.textBrowser.toPlainText()
                 x=str(x)[int(cursor.selectionStart()):int(cursor.selectionEnd())]
                 if x == '':
-                    x = self.textEdit.toPlainText()
+                    x = self.textBrowser.toPlainText()
                 url = ''
                 if m == 'search':
                     o_url = search_dic[self.comboBox_1.currentText()]
