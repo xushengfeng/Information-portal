@@ -143,7 +143,7 @@ class windows():
                 byte_data = cover_image_final.getvalue()
                 base64_str = base64.b64encode(byte_data).decode('utf8')
                 ocr_r = xocr(base64_str)
-                q.put([ocr_r,p.x(),p.y()])
+                q.put([ocr_r[0],ocr_r[1],p.x(),p.y()])
                 # print('put')
                 print(p.x(),p.y())
 
@@ -153,7 +153,7 @@ class windows():
             window.show()
             sys.exit(app.exec_())
 
-    def show_text(x,ox,oy):
+    def show_text(x,lang,ox,oy):
         print(ox)
         from ui import Ui_MainWindow
 
@@ -176,7 +176,7 @@ class windows():
                     lambda: self.display_interface('open'))
                 self.webEngineView = WebEngineView(self.splitter)
                 if len(x)<20:
-                    self.auto_show(x)
+                    self.auto_show(lang)
 
             def auto_xy(self,x,y):
                 self.desktop = QApplication.desktop()
@@ -192,21 +192,8 @@ class windows():
                     y=y-h
                 self.move(x,y)
 
-            def auto_show(self,x):
-                letters = 0
-                space = 0
-                digit = 0
-                others = 0
-                for c in x:
-                    if ord(c) in range(65,91) or ord(c) in range(97,123):
-                        letters+=1
-                    elif c.isspace():
-                        space+=1
-                    elif c.isdigit():
-                        digit+=1
-                    else:
-                        others+=1
-                if letters/(len(x)-space)>0.5:
+            def auto_show(self,lang):
+                if lang=='en':
                     self.display_interface('translate')
                 else:
                     self.display_interface('search')
@@ -261,8 +248,8 @@ def xocr(data):
         print('err')
     text = ''
     for i in r.json()['txts']:
-        text = text+i+'\n'
-    return text
+        text = text+i+'</br>'
+    return [text,r.json()['lang']]
 
 if __name__ == "__main__":
     if 'c' in sys.argv:
@@ -276,6 +263,6 @@ if __name__ == "__main__":
         o.start()
         o.join()
         return_list = q.get()
-        s = multiprocessing.Process(target=windows.show_text, args=(return_list[0],return_list[1],return_list[2]))
+        s = multiprocessing.Process(target=windows.show_text, args=(return_list[0],return_list[1],return_list[2],return_list[3]))
         s.start()
         s.join()
