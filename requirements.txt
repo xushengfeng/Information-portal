@@ -1,0 +1,9 @@
+pyperclip==1.8.2
+opencv_contrib_python==4.4.0.46
+requests==2.26.0
+numpy==1.21.2
+paddleocr==2.3.0.1
+web.py==0.62
+Pillow==8.3.2
+PyQt5==5.15.4
+web==0.6.0
