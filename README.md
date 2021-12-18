@@ -4,6 +4,8 @@
 
 这是类似于锤子大爆炸或小米传送门的Linux实现(当然差很远)
 
+electron重写版本地址[eSearch](https://github.com/xushengfeng/eSearch)
+
 目前可以实现的功能:
 
 - [x]  从剪贴板识别
@@ -16,7 +18,7 @@
 - [x]  点击链接浏览器打开(暂时不支持链接编辑)
 - [x]  中英判断切换模型
 - [ ]  段落，空格识别
-- [ ]  用electron重写
+- [x]  用electron重写
 
 ## 安装和使用
 
